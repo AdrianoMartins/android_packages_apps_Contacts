@@ -300,7 +300,7 @@ public class CallDetailActivity extends Activity implements ProximitySensorAware
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (mCallDetailHeader.handleKeyDown(keyCode, event)) {
-            return true
+            return true;
         }
         return super.onKeyDown(keyCode, event);
     }

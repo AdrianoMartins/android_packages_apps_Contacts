@@ -79,7 +79,7 @@
     <!-- Standard color for selected items. -->
     <color name="item_selected">#660099cc</color>
 
-    <!-- Colors for incoming and outgoing calls in the call statistics -->	82
+    <!-- Colors for incoming and outgoing calls in the call statistics -->
     <color name="call_stats_incoming">#33b5e5</color>
     <color name="call_stats_outgoing">#99cc00</color>
     <color name="call_stats_missed">#eb1313</color>

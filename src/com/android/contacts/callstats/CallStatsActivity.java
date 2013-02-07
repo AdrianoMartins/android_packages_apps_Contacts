@@ -204,11 +204,7 @@ public class CallStatsActivity extends ListActivity implements
                 break;
             }
             case R.id.date_filter: {
-                final DoubleDatePickerDialog.Fragment fragment =
-                        new DoubleDatePickerDialog.Fragment();
-                fragment.setArguments(DoubleDatePickerDialog.Fragment.createArguments(
-                        mFilterFrom, mFilterTo));
-                fragment.show(getFragmentManager(), "filter");
+//                fragment.show(getFragmentManager(), "filter");
                 break;
             }
             case R.id.reset_date_filter: {

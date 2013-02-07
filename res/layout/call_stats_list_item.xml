@@ -70,8 +70,6 @@
             android:layout_marginLeft="@dimen/call_log_inner_margin"
             android:layout_marginTop="@dimen/call_log_icon_margin"
             android:orientation="horizontal"
-            android:paddingEnd="4dp"
-            android:paddingStart="4dp"
             ex:backgroundColor="@color/call_stats_bar_background"
             ex:blueColor="@color/call_stats_incoming"
             ex:greenColor="@color/call_stats_outgoing"
