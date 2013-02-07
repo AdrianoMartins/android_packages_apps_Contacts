@@ -19,46 +19,40 @@ package com.android.contacts.callstats;
 
 import android.app.ActionBar;
 import android.app.ListActivity;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.CallLog;
-import android.provider.CallLog.Calls;
 import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
 import android.text.format.DateUtils;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.contacts.ContactsUtils;
 import com.android.contacts.R;
 import com.android.contacts.activities.DialtactsActivity;
-import com.android.contacts.calllog.ContactInfoHelper;
+import com.android.contacts.calllog.ContactInfo;
 import com.android.contacts.util.Constants;
 import com.android.internal.telephony.CallerInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CallStatsActivity extends ListActivity implements
-        CallStatsQueryHandler.Listener, ActionBar.OnNavigationListener {
+        CallStatsQueryHandler.Listener, ActionBar.OnNavigationListener,
+        DoubleDatePickerDialog.OnDateSetListener {
     private static final String TAG = "CallStatsActivity";
 
     private static final int[] CALL_DIRECTION_RESOURCES = new int[] {
@@ -69,6 +63,8 @@ public class CallStatsActivity extends ListActivity implements
     };
 
     private String[] mNavItems;
+
+    private int mCallTypeFilter = CallStatsQueryHandler.CALL_TYPE_ALL;
     private long mFilterFrom = -1;
     private long mFilterTo = -1;
     private boolean mSortByDuration = true;
@@ -81,62 +77,15 @@ public class CallStatsActivity extends ListActivity implements
     private TextView mSumHeaderView;
     private TextView mDateFilterView;
 
-    private final Handler mHandler = new Handler();
-
-    DoubleDatePickerFragment mFilterFragment;
-    private final ContentObserver mCallLogObserver = new CustomContentObserver();
-    private final ContentObserver mContactsObserver = new CustomContentObserver();
     private boolean mRefreshDataRequired = true;
-
-    private int mCallTypeFilter = CallStatsQueryHandler.CALL_TYPE_ALL;
-
-    private class CustomContentObserver extends ContentObserver {
-        public CustomContentObserver() {
-            super(mHandler);
-        }
-
+    private final ContentObserver mObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
             mRefreshDataRequired = true;
         }
-    }
-
-    public class DoubleDatePickerFragment extends DialogFragment
-            implements DoubleDatePickerDialog.OnDateSetListener {
-
-        DoubleDatePickerDialog mDialog;
-        Context mContext;
-
-        public DoubleDatePickerFragment(Context context) {
-            mContext = context;
-            mDialog = new DoubleDatePickerDialog(context, this);
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return mDialog;
-        }
-
-        @Override
-        public void onStart() {
-            if (mFilterFrom != -1) {
-                mDialog.setValues(mFilterFrom, mFilterTo);
-            } else {
-                mDialog.resetPickers();
-            }
-            super.onStart();
-        }
-
-        public void onDateSet(long from, long to) {
-            mFilterFrom = from;
-            mFilterTo = to;
-            invalidateOptionsMenu();
-            fetchCalls();
-        }
-    }
+    };
 
     public class CallStatsNavAdapter extends ArrayAdapter<String> {
-
         public CallStatsNavAdapter(Context context, int textResourceId, Object[] objects) {
             super(context, textResourceId, mNavItems);
         }
@@ -152,16 +101,17 @@ public class CallStatsActivity extends ListActivity implements
         }
 
         public View getCustomView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = getLayoutInflater();
-            View item = inflater.inflate(R.layout.call_stats_nav_item, parent, false);
+            if (convertView == null) {
+                convertView = getLayoutInflater().inflate(R.layout.call_stats_nav_item, parent, false);
+            }
 
-            TextView label = (TextView) item.findViewById(R.id.call_stats_nav_text);
+            TextView label = (TextView) convertView.findViewById(R.id.call_stats_nav_text);
             label.setText(mNavItems[position]);
 
-            ImageView icon = (ImageView) item.findViewById(R.id.call_stats_nav_icon);
+            ImageView icon = (ImageView) convertView.findViewById(R.id.call_stats_nav_icon);
             icon.setImageResource(CALL_DIRECTION_RESOURCES[position]);
 
-            return item;
+            return convertView;
         }
     }
 
@@ -171,17 +121,13 @@ public class CallStatsActivity extends ListActivity implements
 
         final ContentResolver cr = getContentResolver();
         mCallStatsQueryHandler = new CallStatsQueryHandler(cr, this);
-        cr.registerContentObserver(CallLog.CONTENT_URI, true, mCallLogObserver);
-        cr.registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, mContactsObserver);
+        cr.registerContentObserver(CallLog.CONTENT_URI, true, mObserver);
+        cr.registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, mObserver);
 
-        Resources res = getResources();
-        mFilterFragment = new DoubleDatePickerFragment(this);
-        mNavItems = res.getStringArray(R.array.call_stats_nav_items);
+        mNavItems = getResources().getStringArray(R.array.call_stats_nav_items);
         configureActionBar();
 
-        String currentCountryIso = ContactsUtils.getCurrentCountryIso(this);
-        mAdapter = new CallStatsAdapter(this,
-                new ContactInfoHelper(this, currentCountryIso));
+        mAdapter = new CallStatsAdapter(this);
         setListAdapter(mAdapter);
 
         getListView().setItemsCanFocus(true);
@@ -251,13 +197,18 @@ public class CallStatsActivity extends ListActivity implements
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        switch (item.getItemId()) {
+        final int itemId = item.getItemId();
+        switch (itemId) {
             case android.R.id.home: {
                 onHomeSelected();
                 break;
             }
             case R.id.date_filter: {
-                mFilterFragment.show(getFragmentManager(), "filter");
+                final DoubleDatePickerDialog.Fragment fragment =
+                        new DoubleDatePickerDialog.Fragment();
+                fragment.setArguments(DoubleDatePickerDialog.Fragment.createArguments(
+                        mFilterFrom, mFilterTo));
+                fragment.show(getFragmentManager(), "filter");
                 break;
             }
             case R.id.reset_date_filter: {
@@ -267,15 +218,10 @@ public class CallStatsActivity extends ListActivity implements
                 invalidateOptionsMenu();
                 break;
             }
-            case R.id.sort_by_duration: {
-                mSortByDuration = true;
-                mAdapter.sort(true);
-                invalidateOptionsMenu();
-                break;
-            }
+            case R.id.sort_by_duration:
             case R.id.sort_by_count: {
-                mSortByDuration = false;
-                mAdapter.sort(false);
+                mSortByDuration = itemId == R.id.sort_by_duration;
+                mAdapter.updateDisplayedData(mCallTypeFilter, mSortByDuration);
                 invalidateOptionsMenu();
                 break;
             }
@@ -284,9 +230,17 @@ public class CallStatsActivity extends ListActivity implements
     }
 
     @Override
+    public void onDateSet(long from, long to) {
+        mFilterFrom = from;
+        mFilterTo = to;
+        invalidateOptionsMenu();
+        fetchCalls();
+    }
+
+    @Override
     public boolean onNavigationItemSelected(int position, long id) {
         mCallTypeFilter = position;
-        mCallStatsQueryHandler.fetchCalls(mFilterFrom, mFilterTo);
+        mAdapter.updateDisplayedData(mCallTypeFilter, mSortByDuration);
         return true;
     }
 
@@ -295,12 +249,13 @@ public class CallStatsActivity extends ListActivity implements
      * fetched or updated.
      */
     @Override
-    public void onCallsFetched(Cursor cursor) {
+    public void onCallsFetched(Map<ContactInfo, CallStatsDetails> calls) {
         if (isFinishing()) {
             return;
         }
-        mAdapter.processCursor(cursor, mCallTypeFilter, mFilterFrom, mFilterTo, mSortByDuration);
-        cursor.close();
+
+        mAdapter.updateData(calls, mFilterFrom, mFilterTo);
+        mAdapter.updateDisplayedData(mCallTypeFilter, mSortByDuration);
         updateHeader();
     }
 
@@ -320,16 +275,10 @@ public class CallStatsActivity extends ListActivity implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mAdapter.stopRequestProcessing();
-        getContentResolver().unregisterContentObserver(mCallLogObserver);
-        getContentResolver().unregisterContentObserver(mContactsObserver);
+        getContentResolver().unregisterContentObserver(mObserver);
     }
 
     private void fetchCalls() {
-        mCallStatsQueryHandler.fetchCalls(mFilterFrom, mFilterTo);
-    }
-
-    public void startCallsQuery() {
         mCallStatsQueryHandler.fetchCalls(mFilterFrom, mFilterTo);
     }
 
@@ -349,15 +298,16 @@ public class CallStatsActivity extends ListActivity implements
             mDateFilterView.setText(DateUtils.formatDateRange(this, mFilterFrom, mFilterTo, 0));
             mDateFilterView.setVisibility(View.VISIBLE);
         }
+
+        findViewById(R.id.call_stats_header).setVisibility(View.VISIBLE);
     }
 
     public void callSelectedEntry() {
         int position = getListView().getSelectedItemPosition();
         if (position < 0) {
             // In touch mode you may often not have something selected, so
-            // just call the first entry to make sure that [send] [send] calls
-            // the
-            // most recent entry.
+            // just call the first entry to make sure that [send] calls
+            // the most recent entry.
             position = 0;
         }
         final CallStatsDetails item = mAdapter.getItem(position);
@@ -369,22 +319,21 @@ public class CallStatsActivity extends ListActivity implements
             // This number can't be called, do nothing
             return;
         }
-        Intent intent;
+
+        Uri callUri;
         // If "number" is really a SIP address, construct a sip: URI.
         if (PhoneNumberUtils.isUriNumber(number)) {
-            intent = ContactsUtils.getCallIntent(Uri.fromParts(
-                    Constants.SCHEME_SIP, number, null));
+            callUri = Uri.fromParts(Constants.SCHEME_SIP, number, null);
         } else {
             if (!number.startsWith("+")) {
                 // If the caller-id matches a contact with a better qualified
                 // number, use it
-                String countryIso = item.countryIso;
-                number = mAdapter.getBetterNumberFromContacts(number,
-                        countryIso);
+                number = mAdapter.getBetterNumberFromContacts(number, item.countryIso);
             }
-            intent = ContactsUtils.getCallIntent(Uri.fromParts(
-                    Constants.SCHEME_TEL, number, null));
+            callUri = Uri.fromParts(Constants.SCHEME_TEL, number, null);
         }
+
+        final Intent intent = ContactsUtils.getCallIntent(callUri);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         startActivity(intent);
@@ -397,7 +346,7 @@ public class CallStatsActivity extends ListActivity implements
             // Mark all entries in the contact info cache as out of date, so
             // they will be looked up again once being shown.
             mAdapter.invalidateCache();
-            startCallsQuery();
+            fetchCalls();
             mRefreshDataRequired = false;
         }
     }
