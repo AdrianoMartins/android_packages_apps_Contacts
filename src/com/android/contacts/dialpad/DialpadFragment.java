@@ -96,9 +96,9 @@ import com.android.phone.CallLogAsync;
 import com.android.phone.HapticFeedback;
 
 import android.provider.Settings.SettingNotFoundException;
+import android.hardware.SensorEventListener;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
 /**
@@ -194,6 +194,10 @@ public class DialpadFragment extends Fragment
     private static final String PICK_UP_TO_CALL = "pick_up_to_call";
     private int SensorOrientationY;
     private int SensorProximity;
+    private int oldProximity;
+    private boolean initProx;
+    private boolean proxChanged;
+
 
     /**
      * Identifier for intent extra for sending an empty Flash message for
@@ -304,6 +308,58 @@ public class DialpadFragment extends Fragment
 
         if (state != null) {
             mDigitsFilledByIntent = state.getBoolean(PREF_DIGITS_FILLED_BY_INTENT);
+        }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        switch (event.sensor.getType()) {
+            case Sensor.TYPE_ORIENTATION:
+                SensorOrientationY = (int) event.values[SensorManager.DATA_Y];
+                break;
+
+            case Sensor.TYPE_PROXIMITY:
+                int currentProx = (int) event.values[0];
+                if (initProx) {
+                    SensorProximity = currentProx;
+                    initProx = false;
+                } else {
+                    if (SensorProximity > 0 && currentProx == 0) {
+                        proxChanged = true;
+                    }
+                }
+                SensorProximity = currentProx;
+                break;
+        }
+
+        if (rightOrientation(SensorOrientationY) && SensorProximity == 0 && proxChanged) {
+            if (!isDigitsEmpty()) {
+                mSensorManager.unregisterListener(this, mSensorManager
+                                                .getDefaultSensor(Sensor.TYPE_ORIENTATION));
+                mSensorManager.unregisterListener(this, mSensorManager
+                                                .getDefaultSensor(Sensor.TYPE_PROXIMITY));
+
+                final String number = mDigits.getText().toString();
+                Intent intent = new Intent(Intent.ACTION_CALL_PRIVILEGED);
+                intent = ContactsUtils.getCallIntent(number,
+                        (getActivity() instanceof DialtactsActivity ?
+                        ((DialtactsActivity)getActivity()).getCallOrigin() : null));
+                startActivity(intent);
+                mClearDigitsOnStop = true;
+                getActivity().finish();
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    public boolean rightOrientation(int orientation) {
+        if (orientation < -50 && orientation > -130) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -631,10 +687,20 @@ public class DialpadFragment extends Fragment
             showDialpadChooser(false);
         }
 
+        stopWatch.lap("hnt");
+
+        updateDialAndDeleteButtonEnabledState();
+
+        stopWatch.lap("bes");
+
+        stopWatch.stopAndLog(TAG, 50);
+
         try {
             if(Settings.System.getInt(getActivity().getContentResolver(), PICK_UP_TO_CALL) == 1) {
-                SensorProximity = 1;
                 SensorOrientationY = 0;
+                SensorProximity = 0;
+                proxChanged = false;
+                initProx = true;
 
                 mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
                 mSensorManager.registerListener(this, mSensorManager
@@ -647,14 +713,6 @@ public class DialpadFragment extends Fragment
         } catch (SettingNotFoundException e) {
             Log.w("ERROR", e.toString());
         }
-
-        stopWatch.lap("hnt");
-
-        updateDialAndDeleteButtonEnabledState();
-
-        stopWatch.lap("bes");
-
-        stopWatch.stopAndLog(TAG, 50);
     }
 
     @Override
@@ -681,6 +739,8 @@ public class DialpadFragment extends Fragment
         // lookup the last dialed number has completed.
         mLastNumberDialed = EMPTY_NUMBER;  // Since we are going to query again, free stale number.
 
+        SpecialCharSequenceMgr.cleanup();
+
         try {
             if(Settings.System.getInt(getActivity().getContentResolver(), PICK_UP_TO_CALL) == 1) {
                 mSensorManager.unregisterListener(this, mSensorManager
@@ -691,8 +751,6 @@ public class DialpadFragment extends Fragment
         } catch (SettingNotFoundException e) {
             Log.w("ERROR", e.toString());
         }
-
-        SpecialCharSequenceMgr.cleanup();
     }
 
     @Override
@@ -1253,42 +1311,6 @@ public class DialpadFragment extends Fragment
         getActivity().finish();
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        final String number = mDigits.getText().toString();
-        Intent intent = new Intent(Intent.ACTION_CALL_PRIVILEGED);
-
-        if (isDigitsEmpty()==false) {
-            intent.setData(Uri.fromParts("tel", number, null));
-
-            //get event if orientation is changed
-            switch (event.sensor.getType()) {
-                case Sensor.TYPE_ORIENTATION:
-                    SensorOrientationY = (int) event.values[SensorManager.DATA_Y];
-                    break;
-
-                case Sensor.TYPE_PROXIMITY:
-                    SensorProximity = (int) event.values[0];
-                    break;
-            }
-
-            if (SensorOrientationY < -70 && SensorProximity == 0) {
-                mSensorManager.unregisterListener(this, mSensorManager
-                                                .getDefaultSensor(Sensor.TYPE_ORIENTATION));
-                mSensorManager.unregisterListener(this, mSensorManager
-                                                .getDefaultSensor(Sensor.TYPE_PROXIMITY));
-
-                //start phone call intent
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                mDigits.getText().clear();
-            }
-        }
-    }
-
-@Override
-public void onAccuracyChanged(Sensor sensor, int accuracy) {
-}
 
     public static class ErrorDialogFragment extends DialogFragment {
         private int mTitleResId;
