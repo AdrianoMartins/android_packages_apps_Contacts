@@ -618,4 +618,7 @@
         <item quantity="other">%d hívás</item>
     </plurals>
 
+    <string name="menu_add_to_blacklist">Hozzáadás a feketelistához</string>
+    <string name="toast_added_to_blacklist">%s feketelistára került.</string>
+
 </resources>

@@ -1923,4 +1923,8 @@
         <item quantity="one">1 call</item>
         <item quantity="other">%d calls</item>
     </plurals>
+
+    <string name="menu_add_to_blacklist">Add to blacklist</string>
+    <string name="toast_added_to_blacklist">%s added to blacklist.</string>
+
 </resources>
