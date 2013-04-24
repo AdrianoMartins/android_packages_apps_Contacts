@@ -16,9 +16,8 @@
 
 package com.android.contacts.calllog;
 
-import com.android.contacts.util.UriUtils;
-
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CallLog;
@@ -28,12 +27,21 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 
+import android.widget.Toast;
+
+import com.android.contacts.R;
+import com.android.contacts.util.UriUtils;
+
 /**
  * Utility class to look up the contact information for a given number.
  */
 public class ContactInfoHelper {
     private final Context mContext;
     private final String mCurrentCountryIso;
+
+    // Blacklist support
+    private static final String INSERT_BLACKLIST = "com.android.phone.INSERT_BLACKLIST";
+    private static final String BLACKLIST_NUMBER = "number";
 
     public ContactInfoHelper(Context context, String currentCountryIso) {
         mContext = context;
@@ -278,5 +286,20 @@ public class ContactInfoHelper {
             countryIso = mCurrentCountryIso;
         }
         return PhoneNumberUtils.formatNumber(number, normalizedNumber, countryIso);
+    }
+
+    /**
+     * Requests the given number to be added to the phone blacklist
+     *
+     * @param number the number to be blacklisted
+     */
+    public void addNumberToBlacklist(String number) {
+        Intent intent = new Intent(INSERT_BLACKLIST);
+        intent.putExtra(BLACKLIST_NUMBER, number);
+        mContext.sendBroadcast(intent);
+
+        // Give the user some feedback
+        String message = mContext.getString(R.string.toast_added_to_blacklist, number);
+        Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
     }
 }
