@@ -389,7 +389,7 @@ public class CallLogFragment extends ListFragment
                 int callType = cursor.getInt(CallLogQuery.CALL_TYPE);
                 if (!number.startsWith("+") &&
                        (callType == Calls.INCOMING_TYPE
-                                || callType == Calls.MISSED_TYPE)) {
+                                || callType == Calls.MISSED_TYPE || callType == Calls.REJECTED_TYPE)) {
                     // If the caller-id matches a contact with a better qualified number, use it
                     String countryIso = cursor.getString(CallLogQuery.COUNTRY_ISO);
                     number = mAdapter.getBetterNumberFromContacts(number, countryIso);

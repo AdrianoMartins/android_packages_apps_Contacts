@@ -27,10 +27,13 @@
     <string name="call_stats_nav_incoming">Bejövő</string>
     <string name="call_stats_nav_outgoing">Kimenő</string>
     <string name="call_stats_nav_missed">Nem fogadott</string>
+    <string name="call_stats_nav_rejected">Elutasított</string>
     <string name="call_stats_incoming">Bejövő: <xliff:g id="percent">%d</xliff:g>%%</string>
     <string name="call_stats_outgoing">Kimenő: <xliff:g id="percent">%d</xliff:g>%%</string>
     <string name="call_stats_missed">Nem fogadott</string>
     <string name="call_stats_missed_percent">Nem fogadott: <xliff:g id="percent">%d</xliff:g>%%</string>
+    <string name="call_stats_rejected">Elutasított</string>
+    <string name="call_stats_rejected_percent">Elutasított: <xliff:g id="percent">%d</xliff:g>%%</string>
     <string name="call_stats_header_total">Összesen: <xliff:g id="call_count">%s</xliff:g>, <xliff:g id="duration">%s</xliff:g></string>
     <string name="call_stats_header_total_callsonly">Összesen: <xliff:g id="call_count">%s</xliff:g></string>
     <string name="call_stats_filter_from">Kezdete</string>
@@ -62,5 +65,22 @@
 
     <string name="menu_add_to_blacklist">Hozzáadás a feketelistához</string>
     <string name="toast_added_to_blacklist">%s feketelistára került.</string>
+
+    <!-- Title for rejected call details screen -->
+    <string name="type_rejected">Elutasított hívás</string>
+
+    <!-- The header to show that call log is only showing rejected calls. [CHAR LIMIT=40] -->
+    <string name="call_log_rejected_header">Csak az elutasított hívások</string>
+
+    <!-- Menu item used to show only rejected in the call log. [CHAR LIMIT=30] -->
+    <string name="menu_show_rejected_only">Csak az elutasítottak</string>
+
+    <!-- String describing the icon in the call log used to represent a rejected call.
+
+    Note: AccessibilityServices use this attribute to announce what the view represents.
+    This is especially valuable for views without textual representation like ImageView.
+    -->
+
+    <string name="description_call_log_rejected_call">elutasított hívás</string>
 
 </resources>

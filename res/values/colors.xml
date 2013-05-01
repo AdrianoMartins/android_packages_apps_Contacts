@@ -80,6 +80,7 @@
     <color name="call_stats_incoming">#ff33b5e5</color>
     <color name="call_stats_outgoing">#ff99cc00</color>
     <color name="call_stats_missed">#ffeb1313</color>
+    <color name="call_stats_rejected">#ffdd990f</color>
     <color name="call_stats_bar_background">#88888888</color>
 
     <!-- New Colors for Theme Chooser to be compatible -->
