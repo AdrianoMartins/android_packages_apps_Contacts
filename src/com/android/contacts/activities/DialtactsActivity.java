@@ -747,14 +747,14 @@ public class DialtactsActivity extends TransactionSafeActivity
         final Tab tab = getActionBar().newTab();
         tab.setContentDescription(R.string.dialerIconLabel);
         tab.setTabListener(mTabListener);
-        tab.setIcon(R.drawable.ic_tab_dialer);
+		tab.setCustomView(R.layout.dialer_tab);
         getActionBar().addTab(tab);
     }
 
     private void setupCallLog() {
         final Tab tab = getActionBar().newTab();
         tab.setContentDescription(R.string.recentCallsIconLabel);
-        tab.setIcon(R.drawable.ic_tab_recent);
+		tab.setCustomView(R.layout.recent_tab);
         tab.setTabListener(mTabListener);
         getActionBar().addTab(tab);
     }
@@ -762,7 +762,7 @@ public class DialtactsActivity extends TransactionSafeActivity
     private void setupFavorites() {
         final Tab tab = getActionBar().newTab();
         tab.setContentDescription(R.string.contactsFavoritesLabel);
-        tab.setIcon(R.drawable.ic_tab_all);
+		tab.setCustomView(R.layout.favorites_tab);
         tab.setTabListener(mTabListener);
         getActionBar().addTab(tab);
     }

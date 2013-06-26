@@ -148,8 +148,8 @@ public class DialpadFragment extends Fragment
      */
     private int mDialpadPressCount;
 
-    private View mDialButtonContainer;
     private View mDialButton;
+	private View mAdditionalButtonsRow;
     private ListView mDialpadChooser;
     private DialpadChooserAdapter mDialpadChooserAdapter;
 
@@ -405,13 +405,10 @@ public class DialpadFragment extends Fragment
         int minCellSize = (int) (56 * dm.density); // 56dip == minimum size of menu buttons
         int cellCount = dm.widthPixels / minCellSize;
         int fakeMenuItemWidth = dm.widthPixels / cellCount;
-        mDialButtonContainer = fragmentView.findViewById(R.id.dialButtonContainer);
-        if (mDialButtonContainer != null) {
-            mDialButtonContainer.setPadding(
-                    fakeMenuItemWidth, mDialButtonContainer.getPaddingTop(),
-                    fakeMenuItemWidth, mDialButtonContainer.getPaddingBottom());
-        }
-        mDialButton = fragmentView.findViewById(R.id.dialButton);
+        mAdditionalButtonsRow = fragmentView.findViewById(R.id.dialpadAdditionalButtons);
+
+        // Check whether we should show the onscreen "Dial" button.
+        mDialButton = mAdditionalButtonsRow.findViewById(R.id.dialButton);
         if (r.getBoolean(R.bool.config_show_onscreen_dial_button)) {
             mDialButton.setOnClickListener(this);
             mDialButton.setOnLongClickListener(this);
@@ -420,11 +417,9 @@ public class DialpadFragment extends Fragment
             mDialButton = null;
         }
 
-        mDelete = fragmentView.findViewById(R.id.deleteButton);
-        if (mDelete != null) {
-            mDelete.setOnClickListener(this);
-            mDelete.setOnLongClickListener(this);
-        }
+        mDelete = mAdditionalButtonsRow.findViewById(R.id.deleteButton);
+        mDelete.setOnClickListener(this);
+        mDelete.setOnLongClickListener(this);
 
         mDialpad = fragmentView.findViewById(R.id.dialpad);  // This is null in landscape mode.
 
@@ -1541,8 +1536,7 @@ public class DialpadFragment extends Fragment
                 mDigits.setVisibility(View.GONE);
             }
             if (mDialpad != null) mDialpad.setVisibility(View.GONE);
-            if (mDialButtonContainer != null) mDialButtonContainer.setVisibility(View.GONE);
-
+            mAdditionalButtonsRow.setVisibility(View.GONE);
             mDialpadChooser.setVisibility(View.VISIBLE);
 
             // Instantiate the DialpadChooserAdapter and hook it up to the
@@ -1567,7 +1561,7 @@ public class DialpadFragment extends Fragment
                 mDigits.setVisibility(View.VISIBLE);
             }
             if (mDialpad != null) mDialpad.setVisibility(View.VISIBLE);
-            if (mDialButtonContainer != null) mDialButtonContainer.setVisibility(View.VISIBLE);
+            mAdditionalButtonsRow.setVisibility(View.VISIBLE);
             mDialpadChooser.setVisibility(View.GONE);
         }
     }

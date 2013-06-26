@@ -30,6 +30,7 @@
          android:layout_width="wrap_content"
          android:layout_height="?android:attr/actionBarSize"
          android:layout_gravity="bottom|left"
+		 android:layout_marginLeft="20dip"
          android:state_enabled="false"
          android:background="?android:attr/selectableItemBackground"
          android:contentDescription="@string/description_search_button"
