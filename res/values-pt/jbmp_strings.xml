@@ -1,0 +1,94 @@
+<!--  Copyright (C) 2013 JBMini Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Title bar for call stat detail screen -->
+    <string name="callStatsDetailTitle">Estatística das Chamadas</string>
+
+    <string name="call_stats">Estatísticas</string>
+    <string name="call_stats_refresh">Atualizar</string>
+
+    <string name="activity_title_call_stats">Estatística das Chamadas</string>
+
+    <string name="call_stats_nav_all">Todas</string>
+    <string name="call_stats_nav_incoming">Recebidas</string>
+    <string name="call_stats_nav_outgoing">Efetuadas</string>
+    <string name="call_stats_nav_missed">Perdidas</string>
+    <string name="call_stats_incoming">Recebida: <xliff:g id="percent">%d</xliff:g>%%</string>
+    <string name="call_stats_outgoing">Efetuada: <xliff:g id="percent">%d</xliff:g>%%</string>
+    <string name="call_stats_missed">Perdidas</string>
+    <string name="call_stats_missed_percent">Perdida: <xliff:g id="percent">%d</xliff:g>%%</string>
+    <string name="call_stats_header_total">Total: <xliff:g id="call_count">%s</xliff:g>, <xliff:g id="duration">%s</xliff:g></string>
+    <string name="call_stats_header_total_callsonly">Total: <xliff:g id="call_count">%s</xliff:g></string>
+    <string name="call_stats_filter_from">Data Inicial</string>
+    <string name="call_stats_filter_to">Data Final</string>
+    <string name="call_stats_filter_picker_title">Filtro de Intervalo</string>
+
+    <string name="date_quick_selection">Seleção Rápida</string>
+    <string name="date_qs_currentmonth">Mês Atual</string>
+    <string name="date_qs_currentquarter">Trimestre Atual</string>
+    <string name="date_qs_currentyear">Ano Corrente</string>
+    <string name="date_qs_lastweek">Semana Passada</string>
+    <string name="date_qs_lastmonth">Mês Passada</string>
+    <string name="date_qs_lastquarter">Último Trimeste</string>
+    <string name="date_qs_lastyear">Ano Passado</string>
+
+    <string name="call_stats_date_filter">Ajustar o intervalo de tempo</string>
+    <string name="call_stats_reset_filter">Redefinir o intervalo de tempo</string>
+    <string name="call_stats_sort_by_duration">Ordenar pela duração da chamada</string>
+    <string name="call_stats_sort_by_count">Ordenar pela contagem de chamadas</string>
+
+    <!-- 0:           sec
+         1:      min
+         2:      min  sec
+         3: hour
+         4: hour      sec
+         5: hour min
+         6: hour min  sec -->
+
+    <string-array name="call_stats_duration">
+        <item><xliff:g id="seconds" example="2 segundos">%3$s</xliff:g></item>
+        <item><xliff:g id="minutes" example="2 minutos">%2$s</xliff:g></item>
+        <item><xliff:g id="minutes" example="2 minutos">%2$s</xliff:g> <xliff:g id="seconds" example="2 segundos">%3$s</xliff:g></item>
+        <item><xliff:g id="hours" example="2 horas">%1$s</xliff:g></item>
+        <item><xliff:g id="hours" example="2 horas">%1$s</xliff:g> <xliff:g id="seconds" example="2 segundos">%3$s</xliff:g></item>
+        <item><xliff:g id="hours" example="2 horas">%1$s</xliff:g> <xliff:g id="minutes" example="2 minutos">%2$s</xliff:g></item>
+        <item><xliff:g id="hours" example="2 horas">%1$s</xliff:g> <xliff:g id="minutes" example="2 minutos">%2$s</xliff:g> <xliff:g id="seconds" example="2 segundos">%3$s</xliff:g></item>
+    </string-array>
+
+    <plurals name="hour">
+        <item quantity="one">1 hr</item>
+        <item quantity="other">%d hrs</item>
+    </plurals>
+    <plurals name="minute">
+        <item quantity="one">1 min</item>
+        <item quantity="other">%d mins</item>
+    </plurals>
+    <plurals name="second">
+        <item quantity="one">1 seg</item>
+        <item quantity="other">%d segs</item>
+    </plurals>
+
+    <plurals name="call">
+        <item quantity="one">1 chamada</item>
+        <item quantity="other">%d chamadas</item>
+    </plurals>
+
+    <string name="menu_add_to_blacklist">Adicionar a Lista Negra</string>
+    <string name="toast_added_to_blacklist">%s adicionado a Lista Negra.</string>
+
+</resources>
