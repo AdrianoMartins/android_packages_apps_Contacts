@@ -17,12 +17,12 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- Title bar for call stat detail screen -->
-    <string name="callStatsDetailTitle">Estatística das Chamadas</string>
+    <string name="callStatsDetailTitle">Estatística de Chamadas</string>
 
     <string name="call_stats">Estatísticas</string>
     <string name="call_stats_refresh">Atualizar</string>
 
-    <string name="activity_title_call_stats">Estatística das Chamadas</string>
+    <string name="activity_title_call_stats">Estatística de Chamadas</string>
 
     <string name="call_stats_nav_all">Todas</string>
     <string name="call_stats_nav_incoming">Recebidas</string>
